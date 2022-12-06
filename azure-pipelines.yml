@@ -1,0 +1,51 @@
+trigger:
+  branches:
+    include:
+      - '*'
+
+pool: 
+  vmImage: ubuntu-latest
+
+variables:
+  bkstrngrg: 'tfstatexxx'
+  bkstrg: 'tfstatexxxxxxxxxx'
+  bkcontainer: 'tfstatexxx'
+  bkstrgkey: 'keyxxxxxxxx'
+
+
+
+stages:
+ 
+  - stage: tfdeploy
+    jobs:
+      - job: apply
+        steps:
+
+          - task: TerraformInstaller@0
+            displayName: tfinstall
+            inputs:
+              terraformVersion: 'latest'
+
+          - task: TerraformTaskV3@3
+            displayName: Terraform | INIT
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/Infrastructure/enviornments/Dev'
+              backendServiceArm: 'Azure Hub(xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx)'
+              backendAzureRmResourceGroupName: '$(bkstrngrg)'
+              backendAzureRmStorageAccountName: '$(bkstrg)'
+              backendAzureRmContainerName: '$(bkcontainer)'
+              backendAzureRmKey: '$(bkstrgkey)'
+
+
+          - task: TerraformTaskV3@3
+            inputs:
+              provider: 'azurerm'
+              command: 'plan'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/Infrastructure/enviornments/Dev'
+              environmentServiceNameAzureRM: 'Azure Hub(xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx)'
+              backendAzureRmResourceGroupName: '$(bkstrngrg)'
+              backendAzureRmStorageAccountName: '$(bkstrg)'
+              backendAzureRmContainerName: '$(bkcontainer)'
+              backendAzureRmKey: '$(bkstrgkey)'
